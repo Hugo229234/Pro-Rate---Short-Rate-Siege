@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./zohosdk.js"></script>
+    <title>Short/Pro Rate</title>
+</head>
+<body>
+    <h1>Pro-Rata / Short Rate Calculator</h1>
+    <label for="Premium">Premium Amount</label>
+    <input type="number" id="Premium">
+    <br><br>
+    <label for="Initial Date">Initial Date</label>
+    <input type="date" id="Initial Date">
+    <br><br>
+    <label for="Expiration Date">Expiration Date</label>
+    <input type="date" id="Expiration Date">
+    <br><br>
+    <label for="Cancellation Date">Cancellation Date</label>
+    <input type="date" id="Cancellation Date">
+    <p style="color: red;" id="Error"></p>
+    <button id="submit" onclick="ProAndShort()">Calculate</button>
+    <p id="Pro Rate Output"></p>
+    <p id="Short Rate Output"></p>
+</body>
+<script>
+    ZOHO.embeddedApp.on("PageLoad", function (data) {
+            ZOHO.CRM.API.getRecord({
+                    Entity: data.Entity,
+                    RecordID: data.EntityId 
+            }).then(resp =>{
+                // Gets the policy information from zoho
+                let premium = document.getElementById("Premium").value = resp['data'][0]['Policy_Premium'];
+                let initialDate = document.getElementById("Initial Date").value = resp['data'][0]['Effective_Date'];
+                let expirationDate = document.getElementById("Expiration Date").value = resp['data'][0]['Expiration_Date'];
+                document.getElementById("submit").click();
+            });
+    });
+
+    ZOHO.embeddedApp.init();
+
+    function ProAndShort()
+    {
+        // Grabs the content in the Form Fields
+        let proRate;
+        premium = document.getElementById("Premium").value;
+        initialDate = new Date(document.getElementById("Initial Date").value);
+        expirationDate = new Date(document.getElementById("Expiration Date").value);
+        cancellationDate = new Date(document.getElementById("Cancellation Date").value);
+        daysInBetween = Math.abs((expirationDate - initialDate) / (1000*60*60*24));
+        daysToBeCharged = Math.abs((cancellationDate - initialDate) / (1000*60*60*24));
+        daysLeftToBeCharged = Math.abs((expirationDate - cancellationDate) / (1000*60*60*24));
+        if (daysInBetween === 0 && premium == ''){
+            document.getElementById("Error").innerHTML = "Please Select Proper Dates and Enter a Premium";
+            document.getElementById("Pro Rate Output").innerHTML = '';
+        }
+        else if(premium == ''){
+            document.getElementById("Error").innerHTML = "Please Enter a Premium";
+            document.getElementById("Pro Rate Output").innerHTML = '';
+            document.getElementById("Short Rate Output").innerHTML = '';
+        }
+        else if(daysInBetween === 0 || isNaN(expirationDate.getTime()) || isNaN(initialDate.getTime())){
+            document.getElementById("Error").innerHTML = "Please Select Proper Dates";
+            document.getElementById("Pro Rate Output").innerHTML = '';
+            document.getElementById("Short Rate Output").innerHTML = '';
+        }
+        else if(isNaN(cancellationDate.getTime())){
+            document.getElementById("Error").innerHTML = "Please Select the Cancellation Date";
+            document.getElementById("Pro Rate Output").innerHTML = '';
+            document.getElementById("Short Rate Output").innerHTML = '';
+        }
+        else{
+            document.getElementById("Error").innerHTML = "";
+            costPerDay = premium / daysInBetween;
+            proRate = costPerDay * daysToBeCharged;
+            shortRate = (daysLeftToBeCharged * costPerDay) * .1 + proRate;
+            document.getElementById("Pro Rate Output").innerHTML = 'Pro-Rate: $' + proRate.toFixed(2);
+            document.getElementById("Short Rate Output").innerHTML = 'Short-Rate: $' + shortRate.toFixed(2);;
+        }
+    }
+</script>
+</html>
