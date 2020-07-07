@@ -30,6 +30,7 @@
                     Entity: data.Entity,
                     RecordID: data.EntityId 
             }).then(resp =>{
+                console.log(resp);
                 // Gets the policy information from zoho
                 let premium = document.getElementById("Premium").value = resp['data'][0]['Policy_Premium'];
                 let initialDate = document.getElementById("Initial Date").value = resp['data'][0]['Effective_Date'];
@@ -40,6 +41,20 @@
 
     ZOHO.embeddedApp.init();
 
+    let urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('initial')){
+            // var initialDateFormat =  urlParams.get('initial');s
+            // initialDateFormat = initialDateFormat[2] + '-' + initialDateFormat[1] + '-' + initialDateFormat[0];
+            document.getElementById("Initial Date").value = urlParams.get('initial');
+        }
+        if(urlParams.get('expiration')){
+            document.getElementById("Expiration Date").value = urlParams.get('expiration');
+
+        }
+        if(urlParams.get('premium')){
+            document.getElementById("Premium").value = urlParams.get('premium');
+        }
+        document.getElementById("submit").click();
     function ProAndShort()
     {
         // Grabs the content in the Form Fields
