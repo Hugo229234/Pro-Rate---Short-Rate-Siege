@@ -43,8 +43,6 @@
 
     let urlParams = new URLSearchParams(window.location.search);
         if(urlParams.get('initial')){
-            // var initialDateFormat =  urlParams.get('initial');s
-            // initialDateFormat = initialDateFormat[2] + '-' + initialDateFormat[1] + '-' + initialDateFormat[0];
             document.getElementById("Initial Date").value = urlParams.get('initial');
         }
         if(urlParams.get('expiration')){
